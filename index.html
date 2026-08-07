@@ -97,11 +97,22 @@
   /* --- Arama --- */
   .search-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; box-shadow:var(--shadow-sm);}
   .search-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
-  .search-row input[type=text]{flex:1; min-width:200px; font-size:13.5px; padding:9px 11px; border:1px solid var(--line-strong); border-radius:8px; background:var(--bg); color:var(--ink);}
+  .search-input-wrap{position:relative; flex:1; min-width:200px;}
+  .search-row input[type=text]{width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 34px 9px 11px; border:1px solid var(--line-strong); border-radius:8px; background:var(--bg); color:var(--ink);}
   .search-row input[type=date]{font-size:12.5px; padding:8px 9px; border:1px solid var(--line-strong); border-radius:8px; background:var(--bg); color:var(--ink);}
+  .search-tips-icon{position:absolute; right:7px; top:50%; transform:translateY(-50%); width:20px; height:20px; border-radius:50%; border:none; background:var(--line-strong); color:var(--ink-soft); font-size:11px; font-weight:700; font-style:italic; font-family:Georgia,serif; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;}
+  .search-tips-icon.active{background:var(--navy); color:#fff;}
   .date-filter-row{display:contents;}
   .date-filter-toggle{display:none;}
-  .search-hint{font-size:11.5px; color:var(--ink-faint); margin:8px 0 0; line-height:1.6;}
+  .search-toggles{display:contents;}
+  .search-tips{display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); flex-direction:column; gap:9px;}
+  .search-tips.expanded{display:flex;}
+  .tip-row{display:flex; gap:10px; align-items:flex-start;}
+  .tip-key{flex:none; width:46px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink); background:var(--bg); border:1px solid var(--line-strong); border-radius:6px; padding:3px 4px;}
+  .tip-text{font-size:12.5px; color:var(--ink-soft); line-height:1.55;}
+  .tip-text b{color:var(--ink); font-weight:700;}
+  .tip-text code{font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink);}
+  .tip-mix{padding-top:9px; border-top:1px solid var(--line);}
   .result-count{font-size:12px; color:var(--ink-faint); margin:12px 0 8px;}
   .rc-count{font-weight:600; color:var(--ink);}
   .rc-term{font-family:'JetBrains Mono',monospace; background:var(--bg); color:var(--ink-soft); border-radius:4px; padding:1px 6px;}
@@ -237,10 +248,12 @@
 
     .search-card{padding:12px; margin-top:2px;}
     .search-row{flex-direction:column; align-items:stretch; gap:6px;}
-    .search-row input[type=text]{min-width:0; font-size:16px;}
-    .search-hint{display:none;}
+    .search-input-wrap{min-width:0; width:100%;}
+    .search-row input[type=text]{min-width:0; font-size:16px; padding:12px 38px 12px 13px;}
+    .search-tips-icon{width:22px; height:22px; right:9px;}
 
-    /* Tarih araligi filtresi mobilde varsayilan gizli - sadece istenirse acilir (image2 istegi) */
+    /* Tarih araligi filtresi mobilde varsayilan gizli - sadece istenirse acilir */
+    .search-toggles{display:flex; gap:16px; align-items:center;}
     .date-filter-toggle{display:inline-flex; align-self:flex-start; font-size:12.5px; padding:2px 0;}
     .date-filter-row{display:none; flex-direction:column; gap:8px; width:100%; margin-top:2px;}
     .date-filter-row.expanded{display:flex;}
@@ -332,8 +345,13 @@
 
   <div class="search-card">
     <div class="search-row">
-      <input type="text" id="searchInput" placeholder='Search: 25 mabelle  ·  "no work" exact  ·  tony, izzet = or'>
-      <button type="button" class="link-btn date-filter-toggle" id="dateFilterToggle">Date filter</button>
+      <div class="search-input-wrap">
+        <input type="text" id="searchInput" placeholder='Search: 25 mabelle  ·  "no work" exact  ·  tony, izzet = or'>
+        <button type="button" class="search-tips-icon" id="searchTipsToggle" aria-label="Search tips">i</button>
+      </div>
+      <div class="search-toggles">
+        <button type="button" class="link-btn date-filter-toggle" id="dateFilterToggle">Date filter</button>
+      </div>
       <div class="date-filter-row" id="dateFilterRow">
         <input type="date" id="filterStart">
         <span style="color:var(--ink-faint); font-size:12px;">—</span>
@@ -341,7 +359,12 @@
         <button class="btn btn-ghost" id="clearFilters">Clear</button>
       </div>
     </div>
-    <p class="search-hint">Words separated by a space <b>must all appear in the same entry</b>, in any order — typing "25 mabelle" finds entries containing both. Wrap words in <b>quotes</b> like <code>"no work"</code> to require that exact phrase, in that order. Separate searches with a <b>comma</b> for "or". Works independent of accents/diacritics.</p>
+    <div class="search-tips" id="searchTips">
+      <div class="tip-row"><span class="tip-key">space</span><div class="tip-text"><b>AND</b> — <code>no work</code> finds entries with both words, in any order</div></div>
+      <div class="tip-row"><span class="tip-key">" "</span><div class="tip-text"><b>Exact match</b> — <code>"no work"</code> finds that exact phrase only</div></div>
+      <div class="tip-row"><span class="tip-key">,</span><div class="tip-text"><b>OR</b> — <code>tony, izzet</code> finds entries with either one</div></div>
+      <div class="tip-row tip-mix"><span class="tip-key">mix</span><div class="tip-text"><code>"no work", tony</code> — exact phrase OR that word</div></div>
+    </div>
     <p class="result-count" id="resultCount"></p>
     <div class="result-list" id="resultList"></div>
   </div>
@@ -870,7 +893,12 @@ function renderResults(){
   if(groups.length === 0){
     countEl.innerHTML = `<span class="rc-count">${filtered.length} ${filtered.length === 1 ? "entry" : "entries"}</span>`;
   }else{
-    const groupLabel = groups.map(g => `<span>${g.map(t => `<span class="rc-term">${escapeHtml(t)}</span>`).join(' <span class="rc-and">+</span> ')}</span>`).join(' <span class="rc-or">or</span> ');
+    const groupLabel = groups.map(g => {
+      const inner = g.type === 'phrase'
+        ? `<span class="rc-term">"${escapeHtml(g.phrase)}"</span>`
+        : g.words.map(t => `<span class="rc-term">${escapeHtml(t)}</span>`).join(' <span class="rc-and">+</span> ');
+      return `<span>${inner}</span>`;
+    }).join(' <span class="rc-or">or</span> ');
     countEl.innerHTML = `<span class="rc-count">${filtered.length} ${filtered.length === 1 ? "entry" : "entries"} found</span> — ${groupLabel}`;
   }
 
@@ -1381,6 +1409,10 @@ function init(){
   document.getElementById('searchInput').addEventListener('input', renderResults);
   document.getElementById('dateFilterToggle').addEventListener('click', () => {
     document.getElementById('dateFilterRow').classList.toggle('expanded');
+  });
+  document.getElementById('searchTipsToggle').addEventListener('click', () => {
+    document.getElementById('searchTips').classList.toggle('expanded');
+    document.getElementById('searchTipsToggle').classList.toggle('active');
   });
   document.getElementById('filterStart').addEventListener('change', renderResults);
   document.getElementById('filterEnd').addEventListener('change', renderResults);
