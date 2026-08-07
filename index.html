@@ -346,7 +346,7 @@
   <div class="search-card">
     <div class="search-row">
       <div class="search-input-wrap">
-        <input type="text" id="searchInput" placeholder='Search: 25 mabelle  ·  "no work" exact  ·  tony, izzet = or'>
+        <input type="text" id="searchInput" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" placeholder='Search: 25 mabelle  ·  "no work" exact  ·  tony, izzet = or'>
         <button type="button" class="search-tips-icon" id="searchTipsToggle" aria-label="Search tips">i</button>
       </div>
       <div class="search-toggles">
@@ -703,7 +703,13 @@ function getSearchGroups(){
     .map(g => g.trim())
     .filter(Boolean)
     .map(g => {
-      const quoted = /^".*"$/.test(g) || /^'.*'$/.test(g);
+      // Duz tirnak (" ') veya telefon klavyelerinin otomatik cevirdigi kivrik tirnak
+      // hepsi "tam ifade" olarak taninsin
+      const OPEN_Q = '["\u201c]', CLOSE_Q = '["\u201d]';
+      const OPEN_SQ = "['\u2018]", CLOSE_SQ = "['\u2019]";
+      const quotedDouble = new RegExp('^' + OPEN_Q + '.*' + CLOSE_Q + '$').test(g);
+      const quotedSingle = new RegExp('^' + OPEN_SQ + '.*' + CLOSE_SQ + '$').test(g);
+      const quoted = quotedDouble || quotedSingle;
       if(quoted){
         const inner = normalizeTr(g.slice(1, -1)).trim().replace(/\s+/g, ' ');
         return { type: 'phrase', phrase: inner };
