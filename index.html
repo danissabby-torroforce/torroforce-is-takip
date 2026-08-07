@@ -1,4 +1,5 @@
 
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -37,6 +38,7 @@
   .app{max-width:1080px; margin:0 auto; padding:24px 20px 60px;}
 
   .head{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
+  .owner-tag{margin:0 0 6px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; letter-spacing:.2px; color:#2b4fd6;}
   .head h1{font-family:'Oswald',sans-serif; font-weight:600; font-size:30px; letter-spacing:.3px; margin:0 0 4px; position:relative; display:inline-block;}
   .head h1::after{content:''; position:absolute; left:0; bottom:-6px; width:38px; height:4px; border-radius:3px; background:var(--amber);}
   .head p{margin:10px 0 0; color:var(--ink-soft); font-size:15px;}
@@ -185,6 +187,7 @@
     body{background:var(--bg);}
     .app{padding:12px 10px 48px;}
     .head{margin-bottom:14px;}
+    .owner-tag{font-size:12px;}
     .head h1{font-size:25px;}
     .head p{font-size:14px;}
     .head-tag{font-size:14px; padding:9px 16px; letter-spacing:.2px;}
@@ -229,9 +232,9 @@
 
     /* Takvim gezinme: onceki/sonraki/tarih/bugune git alt alta, net sirayla */
     .cal-toolbar{gap:9px;}
-    .cal-nav{width:100%; display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+    .cal-nav{width:100%; display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;}
     .cal-period{grid-column:1 / -1; order:-1; min-width:0; font-size:17px; font-weight:600; padding:8px 0 2px;}
-    .cal-nav .btn{padding:12px 8px; font-size:14.5px;}
+    .cal-nav .btn{padding:10px 3px; font-size:12px; line-height:1.25; white-space:normal; text-align:center;}
 
     /* Gun paneli basligi: baslik + buton alt alta, buton tam genislik */
     .day-panel-head{flex-direction:column; align-items:stretch; gap:9px;}
@@ -272,6 +275,7 @@
 
   <div class="head">
     <div>
+      <p class="owner-tag">TorroForce &nbsp; Mustafa YILDIRIM</p>
       <h1>Daily Work Log</h1>
       <p>Track site, office, and personal work in one place</p>
     </div>
@@ -1200,12 +1204,17 @@ function setupVoiceButton(btnId, targetId){
 // Genel render + init
 // ============================================================
 function render(){
+  updateTodayTag();
   renderResults();
   renderCalendar();
 }
 
+function updateTodayTag(){
+  document.getElementById('todayTag').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+}
+
 function init(){
-  document.getElementById('todayTag').textContent = new Date().toLocaleDateString('en-US', { day:'2-digit', month:'long', year:'numeric' });
+  updateTodayTag();
   selectedDay = toISODate(new Date());
 
   setupVoiceButton('mainMicBtn', 'mainInput');
@@ -1232,6 +1241,13 @@ function init(){
   document.getElementById('calNextBtn').addEventListener('click', () => navPeriod(1));
   document.getElementById('calGoTodayBtn').addEventListener('click', goToday);
   document.getElementById('refreshBtn').addEventListener('click', () => loadAllData().then(render));
+
+  // Telefon gece yarisini gecip uygulama acik/arka planda kalirsa tarih etiketi bayatlamasin:
+  // uygulamaya her donuste ve her dakika kontrol edip otomatik guncelle.
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible') updateTodayTag();
+  });
+  setInterval(updateTodayTag, 60000);
 
   loadAllData().then(render);
 }
