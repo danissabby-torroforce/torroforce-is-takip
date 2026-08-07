@@ -38,8 +38,8 @@
   .app{max-width:1080px; margin:0 auto; padding:24px 20px 60px;}
 
   .head{display:block; margin-bottom:20px;}
-  .head-top-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line);}
-  .owner-tag{margin:0; font-family:'Inter',sans-serif; font-weight:700; font-size:13px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .head-title-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line);}
+  .owner-tag{margin:0 0 6px; font-family:'Inter',sans-serif; font-weight:700; font-size:13px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .owner-dot{color:var(--amber); margin:0 2px;}
   .head-actions{display:flex; align-items:center; gap:8px; flex:none;}
   .head h1{font-family:'Oswald',sans-serif; font-weight:600; font-size:30px; letter-spacing:.3px; margin:0 0 4px; position:relative; display:inline-block;}
@@ -191,13 +191,13 @@
     body{background:var(--bg);}
     .app{padding:12px 10px 48px;}
     .head{margin-bottom:14px;}
-    .head-top-row{padding-bottom:8px; margin-bottom:9px; gap:6px;}
-    .owner-tag{font-size:9.5px; flex:1; min-width:0;}
-    .head-actions{gap:5px; flex:none;}
-    .head h1{font-size:25px;}
+    .head-title-row{padding-bottom:8px; margin-bottom:9px; gap:6px;}
+    .owner-tag{font-size:10.5px; margin:0 0 6px; white-space:normal;}
+    .head-actions{gap:6px; flex:none;}
+    .head h1{font-size:22px;}
     .head p{font-size:14px;}
-    .head-tag{font-size:10.5px; padding:5px 8px; letter-spacing:0; white-space:nowrap; flex:none;}
-    .btn-ghost#refreshBtn{font-size:10.5px; padding:5px 7px; flex:none;}
+    .head-tag{font-size:11px; padding:6px 10px; letter-spacing:0; white-space:nowrap; flex:none;}
+    .btn-ghost#refreshBtn{font-size:11px; padding:6px 9px; flex:none;}
     .refresh-label{display:none;}
     .sync-status:not(:empty){font-size:9px; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
@@ -286,18 +286,16 @@
   <h2 class="sr-only">Daily work log app with free-text entry, diacritic-independent search, and calendar view</h2>
 
   <div class="head">
-    <div class="head-top-row">
-      <p class="owner-tag">TorroForce <span class="owner-dot">•</span> Mustafa YILDIRIM</p>
+    <p class="owner-tag">TorroForce <span class="owner-dot">•</span> Mustafa YILDIRIM</p>
+    <div class="head-title-row">
+      <h1>Daily Work Log</h1>
       <div class="head-actions">
         <span class="sync-status" id="syncStatus"></span>
         <button class="btn btn-ghost" id="refreshBtn" title="Pull the latest data from Google Sheets"><span class="refresh-icon">↻</span><span class="refresh-label"> Refresh</span></button>
         <span class="head-tag" id="todayTag"></span>
       </div>
     </div>
-    <div>
-      <h1>Daily Work Log</h1>
-      <p>Track site, office, and personal work in one place</p>
-    </div>
+    <p>Track site, office, and personal work in one place</p>
   </div>
 
   <div class="input-card" id="inputCard">
