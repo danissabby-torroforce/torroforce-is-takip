@@ -251,7 +251,11 @@
 
     /* Kayit satirlari: metin tarih rozetinin yanina otursun, daha kompakt */
     .result-row{padding:0; position:relative; overflow:hidden; border-radius:var(--radius);}
-    .result-row.editing{padding:11px 12px; display:flex; flex-wrap:wrap; gap:10px;}
+    .result-row.editing{padding:11px 12px; display:flex; flex-wrap:wrap; gap:10px; overflow:visible;}
+    .result-row.editing .ractions{width:100%; justify-content:flex-end; gap:10px;}
+    .result-row.editing .ractions .btn-icon{border:none; background:none; padding:9px 6px; font-size:14px;}
+    .result-row.editing .ractions .btn-icon.edit-save{background:var(--amber); color:#fff; border-radius:8px; padding:9px 20px; font-weight:700;}
+    .result-row.editing .ractions .btn-icon:not(.edit-save){color:var(--ink-faint);}
     .swipe-content{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start; padding:11px 12px; background:inherit; border-radius:inherit; position:relative; z-index:1; transition:transform .18s ease;}
     .result-row.swiping .swipe-content{transition:none;}
     .result-row:not(.editing) .ractions{display:none;}
@@ -966,9 +970,10 @@ function goToday(){
 
 function renderCalendar(){
   if(calMode === 'today'){
-    document.getElementById('calPeriodLabel').textContent =
-      `${DOW_SHORT[(calAnchor.getDay()+6)%7]}, ${calAnchor.getDate()} ${MONTH_NAMES[calAnchor.getMonth()]} ${calAnchor.getFullYear()}`;
     selectedDay = toISODate(calAnchor);
+    const count = entriesOn(selectedDay).length;
+    document.getElementById('calPeriodLabel').textContent =
+      `${DOW_SHORT[(calAnchor.getDay()+6)%7]}, ${calAnchor.getDate()} ${MONTH_NAMES[calAnchor.getMonth()]} ${calAnchor.getFullYear()} — ${count} ${count === 1 ? "entry" : "entries"}`;
     document.getElementById('calendarBody').innerHTML = '';
   }else if(calMode === 'week'){
     const weekStart = startOfWeekMon(calAnchor);
@@ -1131,7 +1136,6 @@ function renderDayPanel(){
   const dayEntries = entriesOn(selectedDay);
   const head = `
     <div class="day-panel-head">
-      <h3>${dayEntries.length} ${dayEntries.length === 1 ? "entry" : "entries"}</h3>
       <button class="btn btn-primary" onclick="addForDay('${selectedDay}')">+ Add entry for this day</button>
     </div>`;
   const body = dayEntries.length
