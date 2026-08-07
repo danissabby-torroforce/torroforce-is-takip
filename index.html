@@ -37,8 +37,11 @@
   body{margin:0; background:var(--bg); color:var(--ink);}
   .app{max-width:1080px; margin:0 auto; padding:24px 20px 60px;}
 
-  .head{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
-  .owner-tag{margin:0 0 6px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px; letter-spacing:.2px; color:#2b4fd6;}
+  .head{display:block; margin-bottom:20px;}
+  .head-top-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line);}
+  .owner-tag{margin:0; font-family:'Inter',sans-serif; font-weight:700; font-size:13px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .owner-dot{color:var(--amber); margin:0 2px;}
+  .head-actions{display:flex; align-items:center; gap:8px; flex:none;}
   .head h1{font-family:'Oswald',sans-serif; font-weight:600; font-size:30px; letter-spacing:.3px; margin:0 0 4px; position:relative; display:inline-block;}
   .head h1::after{content:''; position:absolute; left:0; bottom:-6px; width:38px; height:4px; border-radius:3px; background:var(--amber);}
   .head p{margin:10px 0 0; color:var(--ink-soft); font-size:15px;}
@@ -109,6 +112,7 @@
   .result-list{display:flex; flex-direction:column; gap:8px;}
   .result-row{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent-strip); border-radius:var(--radius); padding:11px 14px; display:flex; gap:14px; align-items:flex-start;}
   .result-row.editing{border-left-color:var(--amber); background:var(--amber-bg); align-items:stretch; flex-wrap:wrap;}
+  .swipe-content{display:contents;}
   .edit-fields{display:flex; gap:8px; flex:1; min-width:220px; flex-wrap:wrap;}
   .edit-date-input{font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:8px 9px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); flex:none; width:150px;}
   .edit-text-input{flex:1; min-width:180px; font-size:14px; padding:8px 10px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink);}
@@ -187,11 +191,15 @@
     body{background:var(--bg);}
     .app{padding:12px 10px 48px;}
     .head{margin-bottom:14px;}
-    .owner-tag{font-size:12px;}
+    .head-top-row{padding-bottom:8px; margin-bottom:9px; gap:6px;}
+    .owner-tag{font-size:9.5px; flex:1; min-width:0;}
+    .head-actions{gap:5px; flex:none;}
     .head h1{font-size:25px;}
     .head p{font-size:14px;}
-    .head-tag{font-size:14px; padding:9px 16px; letter-spacing:.2px;}
-    .btn-ghost#refreshBtn{font-size:13px; padding:9px 14px;}
+    .head-tag{font-size:10.5px; padding:5px 8px; letter-spacing:0; white-space:nowrap; flex:none;}
+    .btn-ghost#refreshBtn{font-size:10.5px; padding:5px 7px; flex:none;}
+    .refresh-label{display:none;}
+    .sync-status:not(:empty){font-size:9px; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
     .input-card{
       position:sticky; top:0; z-index:20;
@@ -242,11 +250,15 @@
     .day-panel-head .btn-primary{width:100%; padding:14px 16px; font-size:15.5px;}
 
     /* Kayit satirlari: metin tarih rozetinin yanina otursun, daha kompakt */
-    .result-row{flex-wrap:wrap; padding:11px 12px; gap:10px;}
+    .result-row{padding:0; position:relative; overflow:hidden; border-radius:var(--radius);}
+    .result-row.editing{padding:11px 12px; display:flex; flex-wrap:wrap; gap:10px;}
+    .swipe-content{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start; padding:11px 12px; background:inherit; border-radius:inherit; position:relative; z-index:1; transition:transform .18s ease;}
+    .result-row.swiping .swipe-content{transition:none;}
+    .result-row:not(.editing) .ractions{display:none;}
     .result-row .rtext{font-size:15px; line-height:1.5; min-width:0;}
-    .result-row .ractions{flex-basis:100%; justify-content:flex-end; gap:6px; margin-top:-2px;}
-    .result-row .ractions .btn-icon{font-size:14px; font-weight:600; padding:6px 13px; border:1px solid var(--line-strong); border-radius:8px; color:var(--ink-soft); background:var(--panel);}
-    .result-row .ractions .btn-icon:last-child{color:var(--danger); border-color:var(--danger);}
+    .result-row .swipe-hint{position:absolute; top:0; bottom:0; display:flex; align-items:center; font-size:13px; font-weight:700; color:#fff; padding:0 18px; pointer-events:none; opacity:0; z-index:0;}
+    .result-row .swipe-hint.left{left:0; background:var(--danger);}
+    .result-row .swipe-hint.right{right:0; background:var(--danger);}
     .date-badge{width:44px; padding:5px 2px 6px;}
     .date-badge .db-num{font-size:18px;}
     .date-badge .db-mon{font-size:10px;}
@@ -274,15 +286,17 @@
   <h2 class="sr-only">Daily work log app with free-text entry, diacritic-independent search, and calendar view</h2>
 
   <div class="head">
+    <div class="head-top-row">
+      <p class="owner-tag">TorroForce <span class="owner-dot">•</span> Mustafa YILDIRIM</p>
+      <div class="head-actions">
+        <span class="sync-status" id="syncStatus"></span>
+        <button class="btn btn-ghost" id="refreshBtn" title="Pull the latest data from Google Sheets"><span class="refresh-icon">↻</span><span class="refresh-label"> Refresh</span></button>
+        <span class="head-tag" id="todayTag"></span>
+      </div>
+    </div>
     <div>
-      <p class="owner-tag">TorroForce &nbsp; Mustafa YILDIRIM</p>
       <h1>Daily Work Log</h1>
       <p>Track site, office, and personal work in one place</p>
-    </div>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span class="sync-status" id="syncStatus"></span>
-      <button class="btn btn-ghost" id="refreshBtn" title="Pull the latest data from Google Sheets">↻ Refresh</button>
-      <span class="head-tag" id="todayTag"></span>
     </div>
   </div>
 
@@ -733,12 +747,14 @@ function entryRowHtml(e, terms){
       </div>`;
   }
   return `
-    <div class="result-row">
-      ${dateBadgeHtml(e.tarih)}
-      <div class="rtext" data-action="start-edit" data-id="${idAttr}" title="Click to edit">${terms ? highlightText(e.metin, terms) : escapeHtml(e.metin)}</div>
-      <div class="ractions">
-        <button class="btn-icon" data-action="start-edit" data-id="${idAttr}" aria-label="Edit">Edit</button>
-        <button class="btn-icon" data-action="delete-entry" data-id="${idAttr}" aria-label="Delete">Delete</button>
+    <div class="result-row" data-id="${idAttr}">
+      <div class="swipe-content">
+        ${dateBadgeHtml(e.tarih)}
+        <div class="rtext" data-action="start-edit" data-id="${idAttr}" title="Click to edit">${terms ? highlightText(e.metin, terms) : escapeHtml(e.metin)}</div>
+        <div class="ractions">
+          <button class="btn-icon" data-action="start-edit" data-id="${idAttr}" aria-label="Edit">Edit</button>
+          <button class="btn-icon" data-action="delete-entry" data-id="${idAttr}" aria-label="Delete">Delete</button>
+        </div>
       </div>
     </div>`;
 }
@@ -1209,8 +1225,97 @@ function render(){
   renderCalendar();
 }
 
+// ============================================================
+// Mobilde kayitlari saga/sola kaydirarak silme (swipe-to-delete)
+// ============================================================
+function setupSwipeToDelete(containerId){
+  const container = document.getElementById(containerId);
+  if(!container || container.dataset.swipeBound) return;
+  container.dataset.swipeBound = '1';
+
+  let activeRow = null, startX = 0, startY = 0, dx = 0, dragging = false, lockedHorizontal = false;
+  const THRESHOLD = 90; // bu kadar piksel kaydirilirsa silme onayi sorulur
+
+  function ensureHints(row){
+    if(row.querySelector('.swipe-hint')) return;
+    const left = document.createElement('div');
+    left.className = 'swipe-hint left';
+    left.textContent = 'Sil';
+    const right = document.createElement('div');
+    right.className = 'swipe-hint right';
+    right.textContent = 'Sil';
+    row.appendChild(left);
+    row.appendChild(right);
+  }
+
+  container.addEventListener('touchstart', (evt) => {
+    const row = evt.target.closest('.result-row');
+    if(!row || row.classList.contains('editing')) return;
+    activeRow = row;
+    startX = evt.touches[0].clientX;
+    startY = evt.touches[0].clientY;
+    dx = 0;
+    dragging = true;
+    lockedHorizontal = false;
+    ensureHints(row);
+    row.classList.add('swiping');
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (evt) => {
+    if(!dragging || !activeRow) return;
+    const x = evt.touches[0].clientX;
+    const y = evt.touches[0].clientY;
+    dx = x - startX;
+    const dy = y - startY;
+    if(!lockedHorizontal){
+      if(Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      lockedHorizontal = Math.abs(dx) > Math.abs(dy);
+      if(!lockedHorizontal){ dragging = false; return; }
+    }
+    evt.preventDefault();
+    const clamped = Math.max(-140, Math.min(140, dx));
+    const content = activeRow.querySelector('.swipe-content');
+    if(content) content.style.transform = `translateX(${clamped}px)`;
+    const leftHint = activeRow.querySelector('.swipe-hint.left');
+    const rightHint = activeRow.querySelector('.swipe-hint.right');
+    const progress = Math.min(1, Math.abs(clamped) / THRESHOLD);
+    if(clamped < 0 && rightHint) rightHint.style.opacity = progress;
+    if(clamped > 0 && leftHint) leftHint.style.opacity = progress;
+  }, { passive: false });
+
+  function resetRow(row){
+    row.classList.remove('swiping');
+    const content = row.querySelector('.swipe-content');
+    if(content) content.style.transform = '';
+    const leftHint = row.querySelector('.swipe-hint.left');
+    const rightHint = row.querySelector('.swipe-hint.right');
+    if(leftHint) leftHint.style.opacity = 0;
+    if(rightHint) rightHint.style.opacity = 0;
+  }
+
+  container.addEventListener('touchend', () => {
+    if(!dragging || !activeRow || !lockedHorizontal){ dragging = false; activeRow = null; return; }
+    const row = activeRow;
+    const id = row.dataset.id;
+    dragging = false; activeRow = null;
+    if(Math.abs(dx) >= THRESHOLD && id){
+      const text = row.querySelector('.rtext') ? row.querySelector('.rtext').textContent : '';
+      resetRow(row);
+      const ok = window.confirm(`Bu kaydı silmek istediğinize emin misiniz?\n\n"${text}"`);
+      if(ok) window.removeEntry(id);
+    } else {
+      resetRow(row);
+    }
+  });
+
+  container.addEventListener('touchcancel', () => {
+    if(activeRow) resetRow(activeRow);
+    dragging = false; activeRow = null;
+  });
+}
+
 function updateTodayTag(){
-  document.getElementById('todayTag').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+  document.getElementById('todayTag').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
 }
 
 function init(){
@@ -1219,6 +1324,8 @@ function init(){
 
   setupVoiceButton('mainMicBtn', 'mainInput');
   setupInputCardToggle();
+  setupSwipeToDelete('resultList');
+  setupSwipeToDelete('dayPanel');
 
   document.getElementById('searchInput').addEventListener('input', renderResults);
   document.getElementById('dateFilterToggle').addEventListener('click', () => {
