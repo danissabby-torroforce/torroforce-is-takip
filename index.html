@@ -115,7 +115,7 @@
   .swipe-content{display:contents;}
   .edit-fields{display:flex; gap:8px; flex:1; min-width:220px; flex-wrap:wrap;}
   .edit-date-input{font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:8px 9px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); flex:none; width:150px;}
-  .edit-text-input{flex:1; min-width:180px; font-size:14px; padding:8px 10px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); font-family:inherit; line-height:1.5; resize:vertical; overflow:hidden; white-space:pre-wrap;}
+  .edit-text-input{flex:1; min-width:180px; font-size:14px; padding:8px 10px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); font-family:inherit; line-height:1.5; resize:vertical; overflow:hidden; white-space:pre-wrap; min-height:52px;}
   .edit-text-input:focus, .edit-date-input:focus{outline:none; border-color:var(--amber);}
   .btn-icon.edit-save{color:var(--amber); font-weight:700;}
   .date-badge{display:flex; flex-direction:column; align-items:center; justify-content:center; flex:none; width:52px; padding:6px 2px 7px; background:var(--accent-bg); border-radius:9px; line-height:1.1;}
@@ -1241,6 +1241,10 @@ function render(){
   updateTodayTag();
   renderResults();
   renderCalendar();
+  if(editingEntryId){
+    const el = document.getElementById('edit-text-' + editingEntryId);
+    if(el) autoGrowTextarea(el);
+  }
 }
 
 // ============================================================
