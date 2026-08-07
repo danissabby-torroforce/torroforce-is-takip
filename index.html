@@ -115,7 +115,7 @@
   .swipe-content{display:contents;}
   .edit-fields{display:flex; gap:8px; flex:1; min-width:220px; flex-wrap:wrap;}
   .edit-date-input{font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:8px 9px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); flex:none; width:150px;}
-  .edit-text-input{flex:1; min-width:180px; font-size:14px; padding:8px 10px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink);}
+  .edit-text-input{flex:1; min-width:180px; font-size:14px; padding:8px 10px; border:1.5px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); font-family:inherit; line-height:1.5; resize:vertical; overflow:hidden; white-space:pre-wrap;}
   .edit-text-input:focus, .edit-date-input:focus{outline:none; border-color:var(--amber);}
   .btn-icon.edit-save{color:var(--amber); font-weight:700;}
   .date-badge{display:flex; flex-direction:column; align-items:center; justify-content:center; flex:none; width:52px; padding:6px 2px 7px; background:var(--accent-bg); border-radius:9px; line-height:1.1;}
@@ -268,8 +268,8 @@
     .result-count{font-size:13.5px;}
 
     .edit-fields{flex-direction:column;}
-    .edit-date-input{width:100%; font-size:16px; padding:11px 12px;}
-    .edit-text-input{font-size:16px; padding:11px 12px;}
+    .edit-date-input{width:auto; max-width:150px; font-size:13px; padding:8px 10px;}
+    .edit-text-input{font-size:16px; padding:11px 12px; width:100%;}
     .quad-item, .cal-item{font-weight:500; font-size:11.5px;}
     .week-entry-item{font-size:15px; padding:11px 13px;}
     .week-day-title{font-size:16px;}
@@ -736,7 +736,7 @@ function entryRowHtml(e, terms){
       <div class="result-row editing">
         <div class="edit-fields">
           <input type="date" id="edit-date-${idAttr}" value="${escapeAttr(e.tarih)}" class="edit-date-input">
-          <input type="text" id="edit-text-${idAttr}" value="${escapeAttr(e.metin)}" class="edit-text-input">
+          <textarea id="edit-text-${idAttr}" class="edit-text-input" rows="1">${escapeHtml(e.metin)}</textarea>
         </div>
         <div class="ractions">
           <button class="btn-icon edit-save" data-action="save-entry" data-id="${idAttr}" aria-label="Save">Save</button>
@@ -777,9 +777,25 @@ window.startEditEntry = function(id){
   render();
   setTimeout(() => {
     const el = document.getElementById('edit-text-' + id);
-    if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+    if(el){
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+      autoGrowTextarea(el);
+    }
   }, 0);
 };
+
+function autoGrowTextarea(el){
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+
+// Duzenleme kutusuna yazi yazildikca otomatik buyusun - tum metin her zaman gorunsun
+document.addEventListener('input', function(evt){
+  if(evt.target && evt.target.classList && evt.target.classList.contains('edit-text-input')){
+    autoGrowTextarea(evt.target);
+  }
+});
 
 window.cancelEditEntry = function(){
   if(editingEntryId && editingEntryId === newUnsavedEntryId){
@@ -979,7 +995,7 @@ function weekItemHtml(e){
   if(editingEntryId === e.id){
     return `
       <div class="week-entry-item editing">
-        <input type="text" id="edit-text-${idAttr}" value="${escapeAttr(e.metin)}" class="edit-text-input">
+        <textarea id="edit-text-${idAttr}" class="edit-text-input" rows="1">${escapeHtml(e.metin)}</textarea>
         <div class="week-edit-actions">
           <button class="btn-icon edit-save" data-action="save-entry" data-id="${idAttr}" aria-label="Save">Save</button>
           <button class="btn-icon" data-action="cancel-entry" aria-label="Cancel">Cancel</button>
@@ -1115,7 +1131,7 @@ function renderDayPanel(){
   const dayEntries = entriesOn(selectedDay);
   const head = `
     <div class="day-panel-head">
-      <h3>${fmtDate(selectedDay)} — ${dayEntries.length} ${dayEntries.length === 1 ? "entry" : "entries"}</h3>
+      <h3>${dayEntries.length} ${dayEntries.length === 1 ? "entry" : "entries"}</h3>
       <button class="btn btn-primary" onclick="addForDay('${selectedDay}')">+ Add entry for this day</button>
     </div>`;
   const body = dayEntries.length
